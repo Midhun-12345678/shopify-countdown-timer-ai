@@ -1,0 +1,18 @@
+<div
+  id="countdown-timer-root"
+  data-product-id="{{ product.id }}"
+  data-shop="{{ shop.permanent_domain }}">
+</div>
+
+{{ 'countdown.js' | asset_url | script_tag }}
+
+{% schema %}
+{
+  "name": "Countdown Timer",
+  "target": "section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Product", "autofill": true }
+  ]
+}
+{% endschema %}
+
