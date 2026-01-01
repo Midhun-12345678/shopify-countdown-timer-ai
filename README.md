@@ -1,233 +1,174 @@
-Countdown Timer + Analytics + AI Assistant — Shopify App
-📌 Project Overview
+# Shopify Countdown Timer App  
+*(with Analytics & AI Assist)*
 
-This project is a Shopify App that allows merchants to add countdown timers to product pages in order to create urgency and improve conversions.
-The app supports both fixed-time promotions and evergreen (session-based) timers, provides basic analytics, and includes an AI-assisted timer generation feature to help merchants configure timers faster.
+## Overview
 
-The solution is built using Shopify’s official Node + Express app template, follows Theme App Extension guidelines for storefront rendering, and focuses on performance, safety, and simplicity.
+This project is a Shopify App that enables merchants to add **countdown timers** to product pages to create urgency and improve conversions.
 
-🧱 Architecture Overview
+The app supports both **fixed-time promotions** and **evergreen (session-based) timers**, includes **basic impressions analytics**, and provides an **AI-assisted timer configuration** feature to speed up setup for merchants.
 
-The application consists of three main parts:
+The focus of this implementation is **correct Shopify architecture**, **safe storefront rendering**, and **clear separation of concerns** between admin, backend, and storefront.
 
-1. Admin App (Merchant Dashboard)
+---
 
-Built with React + Shopify Polaris
+## How the App Works
 
-Embedded inside Shopify Admin
+The application is composed of **three logical layers**:
 
-Used by merchants to:
+### Admin (Merchant-facing UI)
 
-Create and configure timers
+Merchants configure countdown timers from an embedded Shopify Admin interface built using **React + Shopify Polaris**.
 
-Generate timer suggestions using AI
+From the admin UI, merchants can:
+- Create fixed or evergreen timers
+- Assign timers to specific products
+- View basic impressions analytics
+- Generate timer suggestions using AI (assistive only)
 
-View basic analytics (impressions)
+---
 
-2. Backend (Node + Express)
+### Backend (Node + Express)
 
-Handles:
+The backend layer is responsible for:
+- Timer creation and management
+- Resolving the active timer for a product
+- Tracking impressions
+- Providing AI-assisted timer suggestions
 
-Timer creation and retrieval
+Shopify authentication and session handling are managed using Shopify’s official Node + Express template.
 
-Active timer resolution per product
+---
 
-Impression tracking
+### Storefront (Theme App Extension)
 
-AI-assisted timer suggestion API
+A lightweight JavaScript widget is injected into product pages using a **Theme App Extension**.
 
-Uses Shopify’s authentication and session handling
+The widget:
+- Fetches active timer data from the backend
+- Renders the countdown safely on the storefront
+- Fails gracefully without impacting store performance
 
-For MVP speed, timers are stored in-memory (easily replaceable with MongoDB)
+---
 
-3. Storefront Widget (Theme App Extension)
+## Key Features
 
-Implemented using Theme App Extension
+### Countdown Timers
 
-Lightweight JavaScript widget (no React on storefront)
+- **Fixed Timer**
+  - Same countdown for all users
+  - Based on start and end datetime
 
-Injected into product pages via app block
+- **Evergreen Timer**
+  - Session-based countdown per visitor
+  - Stored using `localStorage`
+  - Does not reset on page refresh
+  - Resets for new visitors or after expiry
 
-Fetches timer configuration from backend and renders countdown safely
+---
 
-✨ Features Implemented
-⏱ Countdown Timers
+### Targeting
 
-Fixed Timers
+- Timers can be assigned to **specific products**
+- The timer renders only when the product context matches
 
-Same countdown for all users
+---
 
-Based on start and end datetime
+### Analytics
 
-Evergreen Timers
+- Tracks **impressions**
+- An impression is recorded whenever a timer is rendered on a product page
+- Analytics logic is handled server-side
 
-Session-based countdown per visitor
+---
 
-Uses localStorage
+### AI-Assisted Timer Generation
 
-Does not reset on page refresh
+- Merchants provide a short intent (e.g. *“flash sale”*)
+- AI suggests:
+  - Timer type
+  - Duration
+  - Basic urgency copy
+- AI outputs are:
+  - Clearly marked as suggestions
+  - Fully editable
+  - Never auto-saved or auto-published
 
-Resets for new visitors or after expiry
+---
 
-🎯 Targeting
+## API Summary
 
-Timers can be assigned to specific products
+### Timers
+- `POST /api/timers` – Create a timer
+- `GET /api/timers` – List timers
+- `GET /api/timers/active?productId=...` – Fetch active timer for a product
 
-Timer is displayed only when product ID matches
+### Analytics
+- `POST /api/timers/:id/impression` – Increment impression count
 
-📊 Basic Analytics
+### AI
+- `POST /api/ai/suggest-timer` – Generate AI-based timer suggestions (assistive only)
 
-Tracks impressions
+---
 
-An impression is counted when a timer is rendered on a product page
+## Testing Approach
 
-Analytics handled via backend API
+Testing focuses on **core business logic** rather than Shopify internals or UI rendering.
 
-🤖 AI-Assisted Timer Generation (Assistive Only)
+Covered cases include:
+- Fixed timer validity within time window
+- Fixed timer expiry handling
+- Evergreen timer expiry calculation
+- Product targeting validation
+- Impression counter increment logic
 
-Merchants can enter an intent (e.g. “flash sale”)
+---
 
-AI suggests:
+## Performance & Safety
 
-Timer type (fixed / evergreen)
+- Storefront widget uses **plain JavaScript**
+- No layout shifts (CLS-safe)
+- Single API call per product page
+- Silent failure handling:
+  - No active timer → nothing rendered
+  - API/network failure → widget fails gracefully
+- No sensitive data exposed to storefront
 
-Duration
+---
 
-Basic urgency headline
+## AI Design Notes
 
-AI suggestions:
+AI is designed to be **assistive**, not authoritative.
 
-Are clearly marked
+- AI never auto-creates or publishes timers
+- AI does not invent discounts, prices, or stock levels
+- Current implementation uses **rules-based / mocked AI**
+- Easily replaceable with a real LLM (e.g. GPT-4o-mini)
 
-Are editable
+---
 
-Are never auto-saved or auto-published
+## Trade-offs & Assumptions
 
-🔌 API Endpoints
-Timer APIs
+Due to time constraints:
+- Timer data is stored **in-memory** instead of MongoDB  
+- Product selection uses manual product ID input  
+- Analytics are limited to impressions only  
 
-POST /api/timers
-Create a new timer
+These trade-offs prioritize **correctness, stability, and complete end-to-end flow**.
 
-GET /api/timers
-List all timers for the shop
+---
 
-GET /api/timers/active?productId=xxx
-Fetch active timer for a given product
+## What I Would Improve With More Time
 
-Analytics
+- Persistent storage using MongoDB
+- Collection-level and global timer targeting
+- Additional analytics (clicks, conversions)
+- API caching and rate limiting
+- Improved admin UI validations
+- Integration with a production LLM
 
-POST /api/timers/:id/impression
-Increment impression count for a timer
+---
 
-AI
+## Running the App Locally
 
-POST /api/ai/suggest-timer
-Returns AI-generated timer suggestions (assistive only)
-
-🧪 Testing Strategy
-
-The project includes unit tests focused on business logic, not Shopify internals.
-
-Covered Test Cases:
-
-Fixed timer active within valid time range
-
-Fixed timer excluded after expiry
-
-Evergreen timer expiry calculation
-
-Product ID targeting validation
-
-Impression counter increments correctly
-
-Testing is intentionally kept lightweight to prioritize core logic under time constraints.
-
-⚡ Performance Considerations
-
-Storefront widget:
-
-Lightweight JavaScript
-
-No React on storefront
-
-No layout shifts (CLS-safe)
-
-Widget gracefully fails:
-
-No timer → renders nothing
-
-Network/API failure → silent fail
-
-Single optimized API call per product page
-
-🔐 Security Considerations
-
-Shopify session validation is used on backend
-
-No secrets exposed to client-side code
-
-All user inputs are sanitized
-
-AI logic runs only on backend
-
-🤖 AI Design Decisions
-
-AI is used as an assistive helper, not an authority
-
-No automatic creation or publishing of timers
-
-AI does not invent:
-
-Discounts
-
-Prices
-
-Stock levels
-
-For this MVP:
-
-AI behavior is rules-based / mocked
-
-Designed to be easily replaceable with a real LLM (e.g. GPT-4o-mini)
-
-⚖️ Trade-offs & Assumptions
-
-Due to the limited timeline:
-
-Timer data is stored in-memory instead of MongoDB
-→ API contracts are designed to support easy DB replacement
-
-Product selection uses manual product ID input
-→ Shopify Resource Picker can be added later
-
-Analytics are limited to impressions only
-→ Clicks and conversion tracking can be added later
-
-These decisions were made intentionally to prioritize correctness, stability, and completeness of core flows.
-
-🚀 What I’d Improve With More Time
-
-Replace in-memory storage with MongoDB
-
-Add collection-based and global targeting
-
-Add more analytics (clicks, conversions)
-
-Add caching headers for timer fetch
-
-Improve admin UI with better validation and UX
-
-Integrate real LLM for AI suggestions
-
-▶️ How to Run Locally
+```bash
 shopify app dev
-
-
-Open the Shopify Admin app preview URL
-
-Add the Countdown Timer app block to a product page
-
-Create a timer from the Admin UI
-
-View the countdown on the storefront
